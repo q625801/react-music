@@ -14,3 +14,6 @@ export const banner = api + '/banner'
 export const personalized = api + '/personalized'
 // ===================推荐新歌曲
 export const newsong = api + '/personalized/newsong'
+
+// ===================音乐url
+export const mp3url = api + '/song/url'

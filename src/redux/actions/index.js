@@ -4,6 +4,12 @@ const sendAction = () => {
         value:true
     }
 }
+const setAudioPlayBtn = (data) => {
+    return {
+        type:'setAudioPlayBtn',
+        value:data
+    }
+}
 module.exports = {
-    sendAction
+    sendAction,setAudioPlayBtn
 }

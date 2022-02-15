@@ -20,6 +20,8 @@ const reducer = (state = initState,action) => {
         case 'send_audioFlag':
             state.audioInfo.audioFlag = action.value
             // return Object.assign({},state,action)
+        case 'setAudioPlayBtn':
+            state.audioInfo.audioPlayBtn = action.value
         default:
             return state
     }

@@ -18,9 +18,6 @@ class renewsong extends React.Component{
             console.log("subscribe：",store.getState())
         })
     }
-    handleClick = () => {
-        console.log("subscribe：",store.getState())
-    }
     getnewsong(){
         postJson(newsong,{},(res) => {
             this.setState({
@@ -33,11 +30,11 @@ class renewsong extends React.Component{
     render(){
         return(
             <div className="wrap wrap-index-qt pd20">
-                <h2 className="newsongs-title" onClick={this.handleClick}>推荐新歌曲</h2>
+                <h2 className="newsongs-title">推荐新歌曲</h2>
                 <div className="newsongs-all clear">
                     {this.state.newsongdata.map((item,index) => {
                         return <div className={['newsongs-list','amn3','sdw','clear',index%2 === 0 ? 'fl' : 'fr'].join(' ')} key={index}>
-                            <div className="fl newsongs-index">
+                            <div className={["fl","newsongs-index",item.id == store.getState().audioInfo.SongInfo.SongId ? 'on' : '',(store.getState().audioInfo.audioPlayBtn && item.id == store.getState().audioInfo.SongInfo.SongId) ? 'btnon' : ''].join(' ')}>
                                 <span>{index+1 >= 10 ? index+1:"0" + (index+1)}</span>
                                 <div className="newsong-player"></div>
                             </div>
@@ -48,14 +45,14 @@ class renewsong extends React.Component{
                                 <span>{item.name}</span>
                                 <span>{SongArtistsComputed(item.song.artists)}</span>
                             </div>
-                            <div className="fr newsongs-duration">
+                            <div className={["fr","newsongs-duration",item.id == store.getState().audioInfo.SongInfo.SongId ? 'on': ''].join(' ')}>
                                 <span className="time">{playtime(item.song.bMusic.playTime)}</span>
-                            <div className="effect">
-                                <span className="line1"></span>
-                                <span className="line2"></span>
-                                <span className="line3"></span>
-                                <span className="line4"></span>
-                            </div>
+                                <div className={['effect',(!store.getState().audioInfo.audioPlayBtn && item.id == store.getState().audioInfo.SongInfo.SongId) ? 'paused' : ''].join(' ')}>
+                                    <span className="line1"></span>
+                                    <span className="line2"></span>
+                                    <span className="line3"></span>
+                                    <span className="line4"></span>
+                                </div>
                             </div>
                         </div>
                     })}

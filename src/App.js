@@ -1,6 +1,7 @@
 import './assets/css/App.css';
 import { Route, Routes } from 'react-router-dom';
 import Home from './page/home'
+import Audio from "./page/components/audio/audio"
 import Login from './page/Login/Login'
 
 //redux
@@ -21,6 +22,7 @@ function App() {
           <Route path='/' element={<Home/>}/>
           <Route path='/login' element={<Login/>}/>
         </Routes>
+        <Audio/>
       </div>
   );
 }
