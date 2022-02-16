@@ -3,7 +3,6 @@ import { Route, Routes } from 'react-router-dom';
 import Home from './page/home'
 import Audio from "./page/components/audio/audio"
 import Login from './page/Login/Login'
-
 //redux
 // import { Provider } from 'react-redux'
 // import { createStore, applyMiddleware, compose } from 'redux'

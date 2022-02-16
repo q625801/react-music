@@ -17,11 +17,25 @@ const initState = {
 const reducer = (state = initState,action) => {
     console.log("reducer：",state,action)
     switch (action.type) {
-        case 'send_audioFlag':
+        case 'setAudioFlag':
             state.audioInfo.audioFlag = action.value
-            // return Object.assign({},state,action)
+            return state
         case 'setAudioPlayBtn':
             state.audioInfo.audioPlayBtn = action.value
+            return state
+        case 'setAudioInfo':
+            if(state.audioInfo.SongInfo.SongId === action.SongInfo.SongId){
+                return state
+            }
+            state.audioInfo.SongInfo = action.SongInfo
+            state.audioInfo.SongList = action.SongList
+            return state
+        case 'setSongInfo':
+            if(state.audioInfo.SongInfo.SongId === action.value.SongId){
+                return state
+            }
+            state.audioInfo.SongInfo = action.value
+            return state
         default:
             return state
     }

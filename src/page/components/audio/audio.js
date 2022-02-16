@@ -5,7 +5,8 @@ import '../../../assets/css/audio.css'
 import {mp3url} from '../../../api/api'
 import {postJson} from '../../../api/apiConfig'
 import store from "../../../redux/store"
-import {setAudioPlayBtn} from "../../../redux/actions"
+import {setAudioPlayBtn,setAudioFlag,setSongInfo} from "../../../redux/actions"
+import {Shuffle,IsPC} from '../../../utils/common'
 class audio extends React.Component{
     constructor(props){
         super(props)
@@ -31,10 +32,11 @@ class audio extends React.Component{
     }
     componentDidMount(){
         this.audioTimeUpdate()
-        this.getmusicurl(369126)
         let that = this
         store.subscribe(() => {
+            console.log(store.getState())
             let storeData = store.getState()
+            that.getSongInfo(storeData)
             if(storeData.audioInfo.audioPlayBtn){
                 that.refs.audio.play();
             }else{
@@ -55,6 +57,7 @@ class audio extends React.Component{
         })
     }
     getmusicurl(id){
+        console.log(this.state.SongId,id)
         postJson(mp3url,{id:id},(res) => {
           if(res.data.data[0].url != null){
             this.refs.audio.src = res.data.data[0].url;
@@ -91,11 +94,11 @@ class audio extends React.Component{
         });
         audio.addEventListener("ended", function(){//监听音频播放完毕
         //   that.refs.lyric.lineNo = 0
-          if(that.state.audioPlayMode == 'loopone'){
+          if(that.state.audioPlayMode === 'loopone'){
             audio.play()
           }else{
             store.dispatch(setAudioPlayBtn(false))
-            // that.nextSong()
+            that.nextSong()
           }
         });
         audio.addEventListener("canplay", function(){//监听audio是否加载完毕，如果加载完毕，则读取audio播放时间
@@ -164,9 +167,179 @@ class audio extends React.Component{
             store.dispatch(setAudioPlayBtn(false))
         }
     }
+    volumeClick(){
+        if(this.state.volumeTitle === '静音'){
+          this.refs.audio.volume = 0
+          this.setState({
+            VolumeSize: 0,
+            volumeTitle: '恢复音量'
+          })
+        }else{
+          this.refs.audio.volume = 1
+          this.setState({
+            VolumeSize: 100,
+            volumeTitle: '静音'
+          })
+        }
+    }
+    changeVolume = (value) => {
+        this.setState({
+            VolumeSize:value
+        })
+        this.refs.audio.volume = this.state.VolumeSize/100
+    }
+    comPlayMode(){
+        if(this.state.audioPlayMode === 'loop'){
+          return ''
+        }else if(this.state.audioPlayMode === 'loopone'){
+          return 'loopone'
+        }else{
+          return 'random'
+        }
+    }
+    changePlayMode(){
+        if(this.state.audioPlayMode === 'loop'){
+            this.setState({
+                audioPlayMode:'loopone'
+            })
+        }else if(this.state.audioPlayMode === 'loopone'){
+            this.setState({
+                audioPlayMode:'random'
+            })
+        }else{
+            this.setState({
+                audioPlayMode:'loop'
+            })
+        }
+    }
+    prevSong = () => {
+        if(this.state.audioPlayMode === 'loop' || this.state.audioPlayMode === 'loopone'){
+            let SongList = store.getState().audioInfo.SongList
+            this.goPrevSong(SongList)
+        }else{
+            this.goPrevSong(this.state.shuffleSongList)
+        }
+    }
+    goPrevSong = (arr = []) => {
+        if(arr.length > 0){
+            let SongOnIndex = arr.findIndex((v,i) => {
+                return this.state.SongId === v.SongId
+            })
+            SongOnIndex--
+            if(SongOnIndex === -1){
+                SongOnIndex = arr.length - 1
+            }
+            store.dispatch(setSongInfo(arr[SongOnIndex]))
+        }
+        
+    }
+    nextSong = () => {
+        if(this.state.audioPlayMode === 'loop' || this.state.audioPlayMode === 'loopone'){
+            let SongList = store.getState().audioInfo.SongList
+            this.goNextSong(SongList)
+        }else if(this.state.audioPlayMode === 'random'){
+            this.goNextSong(this.state.shuffleSongList)
+        }
+    }
+    goNextSong = (arr = []) => {
+        if(arr.length > 0){
+            let SongOnIndex = arr.findIndex((v,i) => {
+                return this.state.SongId === v.SongId
+            })
+            SongOnIndex++
+            if(SongOnIndex === arr.length){
+                SongOnIndex = 0
+            }
+            store.dispatch(setSongInfo(arr[SongOnIndex]))
+        }
+    }
+    yuanmousedown = () => {
+        if(!this.state.audioduration){
+            return
+        }
+        this.setState({
+            is_yuanmousedown:true
+        })
+        let offsetWidth;
+        let that = this;
+        document.onmousemove = (e) => {
+            if (!that.state.is_yuanmousedown){
+                return false;
+            }
+            const left = that.refs.barBg.offsetLeft
+            that.setState({
+                touch:{
+                    startX: e.pageX - left,
+                    width: that.refs.barBg.clientWidth
+                }
+            })
+            if(IsPC()){
+                let deltaX = e.pageX - left;
+                const width = Math.min(Math.max(0, deltaX), that.state.touch.width)
+                offsetWidth = width / that.state.touch.width * 100
+            }
+            that.setProgress(offsetWidth)
+        };
+        document.onmouseup = (ev) => {
+            var that = this;
+            if(that.state.is_yuanmousedown){
+                that.setState({
+                    is_yuanmousedown:false
+                })
+                that.changeTime(offsetWidth)
+            }
+        };
+    }
+    changeTime (time) {
+        const audio = this.refs.audio
+        const current = time * audio.duration / 100
+        audio.currentTime = current
+    }
+    clickBg = (e) => {
+        if(!this.state.audioduration){
+            return
+        }
+        let left = this.refs.barBg.offsetLeft
+        let offsetWidth
+        this.setState({
+            touch:{
+                endX:e.pageX - left,
+                width:this.refs.barBg.clientWidth
+            }
+        },() => {
+            offsetWidth = this.state.touch.endX / this.state.touch.width * 100;
+            this.changeTime(offsetWidth)
+        })
+        
+    }
+    //监听redux数据变化 -------start
+    getSongInfo(newval){
+        if(!newval.audioInfo.SongInfo.SongId){
+            return
+        }
+        let that = this
+        if(that.state.SongId === newval.audioInfo.SongInfo.SongId){
+            return
+        }
+        this.setState({
+            SongId: newval.audioInfo.SongInfo.SongId,
+            SongName: newval.audioInfo.SongInfo.SongName,
+            SongPic: newval.audioInfo.SongInfo.SongPic,
+            SongArtists: newval.audioInfo.SongInfo.SongArtists,
+            shuffleSongList:Shuffle(JSON.parse(JSON.stringify(store.getState().audioInfo.SongList)))
+        },() => {
+            this.init()
+            if(!newval.audioInfo.audioFlag){
+                store.dispatch(setAudioFlag(true))
+            }
+            this.getmusicurl(newval.audioInfo.SongInfo.SongId)
+        })
+        // this.getlyric(newval.SongId)
+    }
+    //监听redux数据变化 -------end
     render(){
         return(
-            <div className="wrap audio-wrap sdwa">
+            <div className="wrap audio-wrap sdwa" style={{display:store.getState().audioInfo.audioFlag ? 'block':'none'}}>
                 <div className="player-bar">
                     <div className="avatar">
                         <img alt="nicemusic" src={this.state.SongPic + '?param=100y100'} title={this.state.SongName}/>
@@ -176,30 +349,30 @@ class audio extends React.Component{
                         <p className="ellipsis">{this.state.SongArtists}</p>
                     </div>
                     <div className="player-btn clear">
-                        <span className="player-prev fl"></span>
+                        <span className="player-prev fl" onClick={this.prevSong}></span>
                         <span onClick={this.audioplay} className={['fl',this.state.audiostate ? 'player-play' : 'player-stop'].join(' ')}></span>
-                        <span className="player-next fl"></span>
+                        <span className="player-next fl" onClick={this.nextSong}></span>
                     </div>
                     <div id="progress-wrap" className="progress-wrap">
                         <p className="current-time">{this.state.playTime}</p>
                         <div className="progress-bar-wrap">
-                            <div className="progress-bar" ref="barBg">
+                            <div className="progress-bar" onMouseDown={this.clickBg} onTouchStart={this.clickBg} ref="barBg">
                                 <div className="bar-inner">
                                     <div className="progress" style={{width:this.state.progressWidth + '%'}}></div>
-                                    <div className="progress-btn" ref="barBgyuan" style={{left:this.state.progressWidth + '%'}}></div>
+                                    <div className="progress-btn" onMouseDown={this.yuanmousedown} ref="barBgyuan" style={{left:this.state.progressWidth + '%'}}></div>
                                 </div>
                             </div>
                         </div>
                         <p className="duration-time"> {this.state.audioduration ? ((parseInt(this.state.audioduration / 60, 10) <= 9 ? '0' + parseInt(this.state.audioduration / 60, 10) : parseInt(this.state.audioduration / 60, 10)) + ':' + (parseInt(this.state.audioduration % 60) <= 9 ? '0' + parseInt(this.state.audioduration % 60) : parseInt(this.state.audioduration % 60))) : ''}</p>
                     </div>
                     <div className="volume-wrap">
-                        <div title={this.state.volumeTitle} className={['volume-yl',this.state.VolumeSize == 0 ? 'off' : ''].join(' ')}></div>
+                        <div title={this.state.volumeTitle} className={['volume-yl',this.state.VolumeSize == 0 ? 'off' : ''].join(' ')/*eslint-disable-line */} onClick={this.volumeClick.bind(this)}></div>
                         <div className='volume-slider'>
-                            <Slider defaultValue={30}/>
+                            <Slider value={this.state.VolumeSize} onChange={this.changeVolume}/>
                         </div>
                     </div>
                     <div className="bfqbox-wrap clear">
-                        <span className={['comPlayMode','bflx','fl'].join(' ')}></span>
+                        <span className={[this.comPlayMode(),'bflx','fl'].join(' ')} onClick={() => {this.changePlayMode()}}></span>
                         <span className="fl text">词</span>
                         <span className="fl list"></span>
                     </div>
