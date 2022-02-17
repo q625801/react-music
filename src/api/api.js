@@ -17,3 +17,5 @@ export const newsong = api + '/personalized/newsong'
 
 // ===================音乐url
 export const mp3url = api + '/song/url'
+// ===================获取歌曲歌词
+export const songlyric = api + '/lyric'

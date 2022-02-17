@@ -2,11 +2,12 @@ import React from 'react'
 import { Slider } from 'antd'
 import 'antd/dist/antd.css'
 import '../../../assets/css/audio.css'
-import {mp3url} from '../../../api/api'
+import {mp3url,songlyric} from '../../../api/api'
 import {postJson} from '../../../api/apiConfig'
 import store from "../../../redux/store"
 import {setAudioPlayBtn,setAudioFlag,setSongInfo} from "../../../redux/actions"
 import {Shuffle,IsPC} from '../../../utils/common'
+import Lyric from './lyric'
 class audio extends React.Component{
     constructor(props){
         super(props)
@@ -27,14 +28,17 @@ class audio extends React.Component{
             SongName:'',
             SongPic:'',
             SongArtists:'',
+
+            LyricData:'',
         }
         this.audioplay = this.audioplay.bind(this)
+        this.audioLyric = React.createRef();
     }
     componentDidMount(){
         this.audioTimeUpdate()
         let that = this
         store.subscribe(() => {
-            console.log(store.getState())
+            // console.log(store.getState())
             let storeData = store.getState()
             that.getSongInfo(storeData)
             if(storeData.audioInfo.audioPlayBtn){
@@ -57,7 +61,6 @@ class audio extends React.Component{
         })
     }
     getmusicurl(id){
-        console.log(this.state.SongId,id)
         postJson(mp3url,{id:id},(res) => {
           if(res.data.data[0].url != null){
             this.refs.audio.src = res.data.data[0].url;
@@ -80,7 +83,7 @@ class audio extends React.Component{
         audio.autoplay = true;
         audio.addEventListener('timeupdate',function(){
           that.setTime()
-        //   that.setLyric()
+          that.setLyric()
         });//监听播放时间
         audio.addEventListener("playing", function(){//监听播放
             that.setState({
@@ -333,10 +336,30 @@ class audio extends React.Component{
                 store.dispatch(setAudioFlag(true))
             }
             this.getmusicurl(newval.audioInfo.SongInfo.SongId)
+            this.getlyric(newval.audioInfo.SongInfo.SongId)
         })
-        // this.getlyric(newval.SongId)
     }
     //监听redux数据变化 -------end
+    changelyricFlag = () => {
+        this.audioLyric.current.changelyricFlag()
+    }
+    getlyric(id){
+        postJson(songlyric,{id:id},(res) => {
+            this.audioLyric.current.changelyricData({
+                lyric:res.data.lrc.lyric,
+                version:res.data.lrc.version
+            })
+            //网易云歌词version 参数 1:有时间 2.没时间
+        },(err) => {
+  
+        },false)
+    }
+    setLyric(){
+        console.log(this.audioLyric.current.lineNo)
+        // if (this.audioLyric.current.lineNo == this.$refs.lyric.lyricContent.length) return;
+        // this.$refs.lyric.lineNo = this.$refs.lyric.getLineNo(this.$refs.audio.currentTime);
+        // this.$refs.lyric.highLight();
+    }
     render(){
         return(
             <div className="wrap audio-wrap sdwa" style={{display:store.getState().audioInfo.audioFlag ? 'block':'none'}}>
@@ -373,13 +396,13 @@ class audio extends React.Component{
                     </div>
                     <div className="bfqbox-wrap clear">
                         <span className={[this.comPlayMode(),'bflx','fl'].join(' ')} onClick={() => {this.changePlayMode()}}></span>
-                        <span className="fl text">词</span>
+                        <span className="fl text" onClick={this.changelyricFlag}>词</span>
                         <span className="fl list"></span>
                     </div>
                 </div>
                 <audio ref="audio">您的浏览器不支持 audio 标签。</audio>
-                {/* <playlist ref="playlist"></playlist>
-                <lyric ref="lyric"></lyric> */}
+                {/* <playlist ref="playlist"></playlist> */}
+                <Lyric ref={this.audioLyric}/>
             </div>
         )
     }

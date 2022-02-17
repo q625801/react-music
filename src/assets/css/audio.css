@@ -289,3 +289,57 @@
     box-shadow: 0 0 0 5px rgb(198 47 47 / 12%);
   }
   .ant-tooltip{z-index: 9999;}
+
+
+  .wrap-lyriclist{
+    width: 500px;
+    box-sizing: border-box;
+    padding: 20px;
+    position: fixed;
+    bottom: 69px;
+    right: 0;
+    background: #ffffff;
+    z-index: 99;
+    overflow: hidden;
+    transform: translateX(500px);
+    opacity:0;
+}
+.wrap-lyriclist.show{
+    transform: translateX(0px);
+    opacity:1;
+}
+.wrap-lyriclist .lyric-content{
+    width:100%;
+    position: relative;
+    height:360px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+.wrap-lyriclist ul {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    list-style: none;
+}
+.wrap-lyriclist ul li {
+    width: 100%;
+    min-height: 31px;
+    line-height: 31px;
+    text-align: center;
+    color:#4a4a4a;
+    font-size:14px;
+}
+.wrap-lyriclist ul li.active {
+    color: #C62F2F;
+    font-weight: bold;
+    font-size: 16px;
+}
+.lyric-p{
+    width: 100%;
+    min-height: 31px;
+    line-height: 31px;
+    text-align: center;
+    color:#4a4a4a;
+    font-size:14px;
+}

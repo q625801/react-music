@@ -15,7 +15,7 @@ const initState = {
     //播放器end
 }
 const reducer = (state = initState,action) => {
-    console.log("reducer：",state,action)
+    // console.log("reducer：",state,action)
     switch (action.type) {
         case 'setAudioFlag':
             state.audioInfo.audioFlag = action.value
