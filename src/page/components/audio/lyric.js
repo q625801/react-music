@@ -36,7 +36,10 @@ let LyricComp = (props,ref) => {
         }
     }
 	useImperativeHandle(ref, () => ({
-		// changeVal 就是暴露给父组件的方法
+        lineNo,
+        lyricData,
+        setlineNo,
+		// changelyricFlag 就是暴露给父组件的方法
 	    changelyricFlag: () => {
             if(lyricFlag){
                 setlyricFlag(false)
@@ -54,7 +57,7 @@ let LyricComp = (props,ref) => {
             }
             let allHegiht = 0
             let lyricul = document.getElementById('lyricul')
-            for(let i = 0;i<this.lineNo;i++){
+            for(let i = 0;i<lineNo;i++){
                 allHegiht += lyricul.children[i].offsetHeight
             }
             lyricul.style.top = (-allHegiht + 180) + 'px';
@@ -91,7 +94,11 @@ let LyricComp = (props,ref) => {
                         return <li key={index} className={lineNo == index ? 'active' : ''}>{item.content}</li>
                     })}
                 </ul>
-                {/* // <p className="lyric-p" v-for="(item,index) in lyricContent" :key="index" v-else>{{item}}</p> */}
+                {!lyricVersion ? (
+                    lyricData.map((item,index) =>{
+                        return <p className="lyric-p" key={index}>{item}</p>
+                    })
+                ) : ''}
             </div>
         </div>
 	)

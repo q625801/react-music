@@ -355,10 +355,9 @@ class audio extends React.Component{
         },false)
     }
     setLyric(){
-        console.log(this.audioLyric.current.lineNo)
-        // if (this.audioLyric.current.lineNo == this.$refs.lyric.lyricContent.length) return;
-        // this.$refs.lyric.lineNo = this.$refs.lyric.getLineNo(this.$refs.audio.currentTime);
-        // this.$refs.lyric.highLight();
+        if (this.audioLyric.current.lineNo == this.audioLyric.current.lyricData.length) return;
+        this.audioLyric.current.setlineNo(this.audioLyric.current.getLineNo(this.refs.audio.currentTime));
+        this.audioLyric.current.highLight();
     }
     render(){
         return(

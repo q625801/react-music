@@ -1,8 +1,8 @@
 import './assets/css/App.css';
-import { Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route  } from "react-router-dom";
 import Home from './page/home'
 import Audio from "./page/components/audio/audio"
-import Login from './page/Login/Login'
+import SheetDetail from './page/sheetdetail/sheetdetail'
 //redux
 // import { Provider } from 'react-redux'
 // import { createStore, applyMiddleware, compose } from 'redux'
@@ -19,7 +19,7 @@ function App() {
     <div className="App">
         <Routes>
           <Route path='/' element={<Home/>}/>
-          <Route path='/login' element={<Login/>}/>
+          <Route path='/sheetdetail' element={<SheetDetail/>}/>
         </Routes>
         <Audio/>
       </div>
